@@ -2,8 +2,8 @@ use num_bigint::BigUint;
 
 #[derive(Clone)]
 pub struct Point {
-    x: Option<BigUint>,
-    y: Option<BigUint>,
+    pub x: Option<BigUint>,
+    pub y: Option<BigUint>,
 }
 
 impl Point {
