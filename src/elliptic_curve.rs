@@ -48,4 +48,9 @@ impl EllipticCurve {
 
         Point::new(Some(x3), Some(y3))
     }
+
+    fn scalar_multiplication(&self, scalar: BigUint, p: &Point) -> Point {
+        // ! TODO -> implement this
+        Point::new(None, None)
+    }
 }
