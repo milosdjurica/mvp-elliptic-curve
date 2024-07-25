@@ -1,4 +1,4 @@
-use crate::point::Point;
+use crate::point::{self, Point};
 use num_bigint::BigUint;
 
 pub struct EllipticCurve {
@@ -49,8 +49,19 @@ impl EllipticCurve {
         Point::new(Some(x3), Some(y3))
     }
 
-    fn scalar_multiplication(&self, scalar: BigUint, p: &Point) -> Point {
-        // ! TODO -> implement this
-        Point::new(None, None)
+    fn scalar_multiplication(&self, scalar: &BigUint, point: &Point) -> Point {
+        let mut result = Point::new(None, None);
+        let mut current = point.clone();
+        let mut k = scalar.clone();
+
+        while k > BigUint::from(0u32) {
+            if &k % 2u32 == BigUint::from(1u32) {
+                result = self.add_points(&result, &current);
+            }
+            current = self.add_points(&current, &current);
+            k >>= 1;
+        }
+
+        result
     }
 }
