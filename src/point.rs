@@ -1,6 +1,6 @@
 use num_bigint::BigUint;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Point {
     pub x: Option<BigUint>,
     pub y: Option<BigUint>,
