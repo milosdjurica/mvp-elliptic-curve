@@ -14,17 +14,17 @@ fn main() {
 
     let x1 = BigUint::from(3u32);
     let y1 = BigUint::from(6u32);
-    let p1 = Point::new(Some(x1), Some(y1));
+    let point1 = Point::new(Some(x1), Some(y1));
 
     let x2 = BigUint::from(10u32);
     let y2 = BigUint::from(22u32);
-    let p2 = Point::new(Some(x2), Some(y2));
+    let point2 = Point::new(Some(x2), Some(y2));
 
-    let p3 = curve.add_points(&p1, &p2);
-    println!("P3: {:?}", p3);
+    let point3 = curve.add_points(&point1, &point2);
+    println!("Point3 (add_points): {:?}", point3);
 
     let scalar = BigUint::from(2u32);
-    let p4 = curve.scalar_multiplication(&scalar, &p1);
+    let point4 = curve.scalar_multiplication(&scalar, &point1);
 
-    println!("P4: {:?}", p4);
+    println!("Point4 (scalar_multiplication): {:?}", point4);
 }
