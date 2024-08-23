@@ -13,14 +13,17 @@ cd mvp-elliptic-curve
 cargo build
 ```
 
-# Elliptic curve formulas
-
-![Formula][EC-Formula-image-url]
-
 # Run program
 
 ```bash
 cargo run
 ```
 
+# Elliptic curve formulas
+
+![Equation][EC-Equation-image-url]
+
+![Formula][EC-Formula-image-url]
+
+[EC-Equation-image-url]: https://github.com/milosdjurica/mvp-elliptic-curve/blob/main/public/elliptic-curve-equation.png
 [EC-Formula-image-url]: https://github.com/milosdjurica/mvp-elliptic-curve/blob/main/public/elliptic-curve-formula.png
