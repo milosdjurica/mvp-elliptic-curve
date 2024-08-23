@@ -3,7 +3,7 @@ use num_bigint::BigUint;
 
 pub struct EllipticCurve {
     a: BigUint,
-    // #[allow(dead_code)]
+    #[allow(dead_code)]
     b: BigUint,
     p: BigUint,
 }
