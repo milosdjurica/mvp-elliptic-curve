@@ -29,7 +29,6 @@ impl EllipticCurve {
 
         let slope;
 
-        // TODO -> add formulas in README.md
         if x1 == x2 && y1 == y2 {
             // Point doubling
             let numerator = (BigUint::from(3u32) * x1 * x1 + &self.a) % &self.p;
