@@ -13,6 +13,33 @@ impl EllipticCurve {
         EllipticCurve { a, b, p }
     }
 
+    fn calculate_slope(&self, x1: &BigUint, y1: &BigUint, x2: &BigUint, y2: &BigUint) -> BigUint {
+        let numerator;
+        let denominator;
+        if x1 == x2 && y1 == y2 {
+            // Point doubling
+            numerator = (BigUint::from(3u32) * x1 * x1 + &self.a) % &self.p;
+            denominator =
+                (BigUint::from(2u32) * y1).modpow(&(&self.p - BigUint::from(2u32)), &self.p);
+        } else {
+            // Point addition
+            numerator = (y2 + &self.p - y1) % &self.p;
+            denominator = (x2 + &self.p - x1).modpow(&(&self.p - BigUint::from(2u32)), &self.p);
+        }
+        (numerator * denominator) % &self.p
+    }
+
+    pub fn negate_point(&self, point: &Point) -> Point {
+        if point.is_infinity() {
+            return point.clone();
+        }
+
+        let x = point.x.as_ref().unwrap();
+        let y = point.y.as_ref().unwrap();
+
+        Point::new(Some(x.clone()), Some((&self.p - y) % &self.p))
+    }
+
     pub fn add_points(&self, point1: &Point, point2: &Point) -> Point {
         if point1.is_infinity() {
             return point2.clone();
@@ -27,22 +54,7 @@ impl EllipticCurve {
         let x2 = point2.x.as_ref().unwrap();
         let y2 = point2.y.as_ref().unwrap();
 
-        let slope;
-
-        if x1 == x2 && y1 == y2 {
-            // Point doubling
-            let numerator = (BigUint::from(3u32) * x1 * x1 + &self.a) % &self.p;
-            let denominator =
-                (BigUint::from(2u32) * y1).modpow(&(&self.p - BigUint::from(2u32)), &self.p);
-
-            slope = (numerator * denominator) % &self.p;
-        } else {
-            // Point addition
-            let numerator = (y2 + &self.p - y1) % &self.p;
-            let denominator = (x2 + &self.p - x1).modpow(&(&self.p - BigUint::from(2u32)), &self.p);
-
-            slope = (numerator * denominator) % &self.p;
-        }
+        let slope = self.calculate_slope(x1, y1, x2, y2);
 
         let x3 = (slope.clone() * slope.clone() + &self.p - x1 + &self.p - x2) % &self.p;
         let y3 = (slope * (x1 + &self.p - &x3) + &self.p - y1) % &self.p;
