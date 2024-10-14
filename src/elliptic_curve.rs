@@ -13,22 +13,6 @@ impl EllipticCurve {
         EllipticCurve { a, b, p }
     }
 
-    fn calculate_slope(&self, x1: &BigUint, y1: &BigUint, x2: &BigUint, y2: &BigUint) -> BigUint {
-        let numerator;
-        let denominator;
-        if x1 == x2 && y1 == y2 {
-            // Point doubling
-            numerator = (BigUint::from(3u32) * x1 * x1 + &self.a) % &self.p;
-            denominator =
-                (BigUint::from(2u32) * y1).modpow(&(&self.p - BigUint::from(2u32)), &self.p);
-        } else {
-            // Point addition
-            numerator = (y2 + &self.p - y1) % &self.p;
-            denominator = (x2 + &self.p - x1).modpow(&(&self.p - BigUint::from(2u32)), &self.p);
-        }
-        (numerator * denominator) % &self.p
-    }
-
     pub fn negate_point(&self, point: &Point) -> Point {
         if point.is_infinity() {
             return point.clone();
@@ -40,6 +24,10 @@ impl EllipticCurve {
         Point::new(Some(x.clone()), Some((&self.p - y) % &self.p))
     }
 
+    pub fn substract_points(&self, point1: &Point, point2: &Point) -> Point {
+        self.add_points(point1, &self.negate_point(point2))
+    }
+
     pub fn add_points(&self, point1: &Point, point2: &Point) -> Point {
         if point1.is_infinity() {
             return point2.clone();
@@ -49,10 +37,8 @@ impl EllipticCurve {
             return point1.clone();
         }
 
-        let x1 = point1.x.as_ref().unwrap();
-        let y1 = point1.y.as_ref().unwrap();
-        let x2 = point2.x.as_ref().unwrap();
-        let y2 = point2.y.as_ref().unwrap();
+        let (x1, y1) = (point1.x.as_ref().unwrap(), point1.x.as_ref().unwrap());
+        let (x2, y2) = (point2.x.as_ref().unwrap(), point2.x.as_ref().unwrap());
 
         let slope = self.calculate_slope(x1, y1, x2, y2);
 
@@ -76,5 +62,21 @@ impl EllipticCurve {
         }
 
         result
+    }
+
+    fn calculate_slope(&self, x1: &BigUint, y1: &BigUint, x2: &BigUint, y2: &BigUint) -> BigUint {
+        let numerator;
+        let denominator;
+        if x1 == x2 && y1 == y2 {
+            // Point doubling
+            numerator = (BigUint::from(3u32) * x1 * x1 + &self.a) % &self.p;
+            denominator =
+                (BigUint::from(2u32) * y1).modpow(&(&self.p - BigUint::from(2u32)), &self.p);
+        } else {
+            // Point addition
+            numerator = (y2 + &self.p - y1) % &self.p;
+            denominator = (x2 + &self.p - x1).modpow(&(&self.p - BigUint::from(2u32)), &self.p);
+        }
+        (numerator * denominator) % &self.p
     }
 }
