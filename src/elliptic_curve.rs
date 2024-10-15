@@ -24,7 +24,7 @@ impl EllipticCurve {
         Point::new(Some(x.clone()), Some((&self.p - y) % &self.p))
     }
 
-    pub fn substract_points(&self, point1: &Point, point2: &Point) -> Point {
+    pub fn subtract_points(&self, point1: &Point, point2: &Point) -> Point {
         self.add_points(point1, &self.negate_point(point2))
     }
 
@@ -54,6 +54,7 @@ impl EllipticCurve {
     }
 
     pub fn add_points(&self, point1: &Point, point2: &Point) -> Point {
+        // Adding points at infinity
         if point1.is_infinity() {
             return point2.clone();
         }
@@ -62,8 +63,13 @@ impl EllipticCurve {
             return point1.clone();
         }
 
-        let (x1, y1) = (point1.x.as_ref().unwrap(), point1.x.as_ref().unwrap());
-        let (x2, y2) = (point2.x.as_ref().unwrap(), point2.x.as_ref().unwrap());
+        let (x1, y1) = (point1.x.as_ref().unwrap(), point1.y.as_ref().unwrap());
+        let (x2, y2) = (point2.x.as_ref().unwrap(), point2.y.as_ref().unwrap());
+
+        // Adding inverse
+        if x1 == x2 && (y1 + y2) % &self.p == BigUint::from(0u32) {
+            return Point::new(None, None);
+        }
 
         let slope = self.calculate_slope(x1, y1, x2, y2);
 
@@ -73,6 +79,17 @@ impl EllipticCurve {
         Point::new(Some(x3), Some(y3))
     }
 
+    pub fn order_of_point(&self, point: &Point) -> BigUint {
+        let mut k = BigUint::from(1u32);
+        let mut current = point.clone();
+
+        while !current.is_infinity() {
+            current = self.add_points(&current, point);
+            k += 1u32;
+        }
+
+        k
+    }
     fn calculate_slope(&self, x1: &BigUint, y1: &BigUint, x2: &BigUint, y2: &BigUint) -> BigUint {
         let numerator;
         let denominator;
@@ -84,7 +101,6 @@ impl EllipticCurve {
             // Point addition
             numerator = (y2 + &self.p - y1) % &self.p;
             denominator = self.calculate_inverse(&(x2 + &self.p - x1));
-            // denominator = (x2 + &self.p - x1).modpow(&(&self.p - BigUint::from(2u32)), &self.p);
         }
         (numerator * denominator) % &self.p
     }
