@@ -90,6 +90,7 @@ impl EllipticCurve {
 
         k
     }
+
     fn calculate_slope(&self, x1: &BigUint, y1: &BigUint, x2: &BigUint, y2: &BigUint) -> BigUint {
         let numerator;
         let denominator;
