@@ -8,20 +8,29 @@ pub struct EllipticCurve {
     p: BigUint,
 }
 
+#[derive(Debug)]
+pub enum CurveError {
+    InvalidPoint,
+}
+
 impl EllipticCurve {
     pub fn new(a: BigUint, b: BigUint, p: BigUint) -> Self {
         EllipticCurve { a, b, p }
     }
 
-    pub fn negate_point(&self, point: &Point) -> Point {
+    pub fn negate_point(&self, point: &Point) -> Result<Point, CurveError> {
+        if !self.ensure_point_is_valid(point) {
+            return Err(CurveError::InvalidPoint);
+        }
+
         if point.is_infinity() {
-            return point.clone();
+            return Ok(point.clone());
         }
 
         let x = point.x.as_ref().unwrap();
         let y = point.y.as_ref().unwrap();
 
-        Point::new(Some(x.clone()), Some((&self.p - y) % &self.p))
+        Ok(Point::new(Some(x.clone()), Some((&self.p - y) % &self.p)))
     }
 
     pub fn ensure_point_is_valid(&self, point: &Point) -> bool {
@@ -38,8 +47,8 @@ impl EllipticCurve {
         return left_side == right_side;
     }
 
-    pub fn subtract_points(&self, point1: &Point, point2: &Point) -> Point {
-        self.add_points(point1, &self.negate_point(point2))
+    pub fn subtract_points(&self, point1: &Point, point2: &Point) -> Result<Point, CurveError> {
+        Ok(self.add_points(point1, &self.negate_point(point2)?))
     }
 
     pub fn scalar_division(&self, scalar: BigUint, point: &Point) -> Option<Point> {

@@ -20,7 +20,7 @@ mod tests {
         let curve = create_curve(2, 3, 97);
         let point = Point::new(None, None);
 
-        let negated = curve.negate_point(&point);
+        let negated = curve.negate_point(&point).unwrap();
 
         assert!(negated.is_infinity());
     }
