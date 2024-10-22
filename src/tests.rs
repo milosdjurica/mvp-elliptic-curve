@@ -332,4 +332,14 @@ mod tests {
 
         assert_eq!(result.unwrap(), to_biguint(50));
     }
+
+    #[test]
+    fn test_order_of_point_success_3() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(None, None);
+
+        let result = curve.order_of_point(&point);
+
+        assert_eq!(result.unwrap(), to_biguint(1));
+    }
 }
