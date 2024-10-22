@@ -301,4 +301,35 @@ mod tests {
 
         assert_eq!(result.unwrap(), expected_result);
     }
+
+    #[test]
+    fn test_order_of_point_invalid_points() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(0)), Some(to_biguint(0)));
+
+        let result = curve.order_of_point(&point);
+
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), CurveError::InvalidPoint);
+    }
+
+    #[test]
+    fn test_order_of_point_success_1() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(68)), Some(to_biguint(0)));
+
+        let result = curve.order_of_point(&point);
+
+        assert_eq!(result.unwrap(), to_biguint(2));
+    }
+
+    #[test]
+    fn test_order_of_point_success_2() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+
+        let result = curve.order_of_point(&point);
+
+        assert_eq!(result.unwrap(), to_biguint(50));
+    }
 }
