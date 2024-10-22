@@ -24,6 +24,20 @@ impl EllipticCurve {
         Point::new(Some(x.clone()), Some((&self.p - y) % &self.p))
     }
 
+    pub fn ensure_point_is_valid(&self, point: &Point) -> bool {
+        if point.is_infinity() {
+            return true;
+        }
+
+        let x = point.x.as_ref().unwrap();
+        let y = point.y.as_ref().unwrap();
+
+        let left_side = (y * y) % &self.p;
+        let right_side = (x * x * x + &self.a * x + &self.b) % &self.p;
+
+        return left_side == right_side;
+    }
+
     pub fn subtract_points(&self, point1: &Point, point2: &Point) -> Point {
         self.add_points(point1, &self.negate_point(point2))
     }
