@@ -16,21 +16,22 @@ mod tests {
     }
 
     #[test]
+    fn test_point_not_valid() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(0)), Some(to_biguint(0)));
+
+        assert!(!curve.ensure_point_is_valid(&point))
+    }
+
+    #[test]
     fn test_negate_point_not_valid() {
         let curve = create_curve(2, 3, 97);
         let point = Point::new(Some(to_biguint(0)), Some(to_biguint(0)));
 
         let negated = curve.negate_point(&point);
 
+        assert!(negated.is_err());
         assert_eq!(negated.unwrap_err(), CurveError::InvalidPoint);
-    }
-
-    #[test]
-    fn test_point_not_valid() {
-        let curve = create_curve(2, 3, 97);
-        let point = Point::new(Some(to_biguint(0)), Some(to_biguint(0)));
-
-        assert!(!curve.ensure_point_is_valid(&point))
     }
 
     #[test]
@@ -41,5 +42,35 @@ mod tests {
         let negated = curve.negate_point(&point).unwrap();
 
         assert!(negated.is_infinity());
+    }
+
+    #[test]
+    fn test_negate_negates_correctly_1() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+
+        let expected_negated = Point::new(Some(to_biguint(0)), Some(to_biguint(87)));
+        let negated = curve.negate_point(&point).unwrap();
+        assert_eq!(expected_negated, negated);
+    }
+
+    #[test]
+    fn test_negate_negates_correctly_2() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(0)), Some(to_biguint(87)));
+
+        let expected_negated = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+        let negated = curve.negate_point(&point).unwrap();
+        assert_eq!(expected_negated, negated);
+    }
+
+    #[test]
+    fn test_negate_negates_correctly_3() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(3)), Some(to_biguint(91)));
+
+        let expected_negated = Point::new(Some(to_biguint(3)), Some(to_biguint(6)));
+        let negated = curve.negate_point(&point).unwrap();
+        assert_eq!(expected_negated, negated);
     }
 }
