@@ -146,7 +146,8 @@ impl EllipticCurve {
         (numerator * denominator) % &self.p
     }
 
-    fn calculate_inverse(&self, number_to_invert: &BigUint) -> BigUint {
+    pub fn calculate_inverse(&self, number_to_invert: &BigUint) -> BigUint {
+        // ! TODO -> MAYBE HERE SHOULD THROW ERROR IF NUMBER IS 0 !!! Check after in with add_points method
         number_to_invert.modpow(&(&self.p - BigUint::from(2u32)), &self.p)
     }
 }

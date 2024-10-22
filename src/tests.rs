@@ -109,4 +109,41 @@ mod tests {
 
         assert_eq!(result, expected_result);
     }
+
+    #[test]
+    fn test_scalar_division_scalar_is_zero() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+        let scalar = to_biguint(0);
+
+        let result = curve.scalar_division(scalar, &point);
+
+        assert!(result.clone().is_err());
+        assert_eq!(result.unwrap_err(), CurveError::ScalarIsZero);
+    }
+
+    #[test]
+    fn test_scalar_division_invalid_point() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(0)), Some(to_biguint(0)));
+        let scalar = to_biguint(10);
+
+        let result = curve.scalar_division(scalar, &point);
+
+        assert!(result.clone().is_err());
+        assert_eq!(result.unwrap_err(), CurveError::InvalidPoint);
+    }
+
+    #[test]
+    fn test_scalar_division_success() {
+        let curve = create_curve(2, 3, 97);
+        let point = Point::new(Some(to_biguint(0)), Some(to_biguint(0)));
+        let scalar = to_biguint(10);
+
+        let inverse = curve.calculate_inverse(&scalar);
+        let expected_result = curve.scalar_multiplication(&inverse, &point);
+        let result = curve.scalar_division(scalar, &point);
+
+        assert_eq!(expected_result, result);
+    }
 }
