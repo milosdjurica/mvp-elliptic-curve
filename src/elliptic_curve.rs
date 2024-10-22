@@ -8,59 +8,95 @@ pub struct EllipticCurve {
     p: BigUint,
 }
 
+#[derive(Debug, PartialEq, Clone)]
+pub enum CurveError {
+    InvalidPoint,
+    ScalarIsZero,
+}
+
 impl EllipticCurve {
     pub fn new(a: BigUint, b: BigUint, p: BigUint) -> Self {
         EllipticCurve { a, b, p }
     }
 
-    pub fn negate_point(&self, point: &Point) -> Point {
+    pub fn is_valid_point(&self, point: &Point) -> bool {
         if point.is_infinity() {
-            return point.clone();
+            return true;
         }
 
         let x = point.x.as_ref().unwrap();
         let y = point.y.as_ref().unwrap();
 
-        Point::new(Some(x.clone()), Some((&self.p - y) % &self.p))
+        let left_side = (y * y) % &self.p;
+        let right_side = (x * x * x + &self.a * x + &self.b) % &self.p;
+
+        return left_side == right_side;
     }
 
-    pub fn subtract_points(&self, point1: &Point, point2: &Point) -> Point {
-        self.add_points(point1, &self.negate_point(point2))
+    pub fn negate_point(&self, point: &Point) -> Result<Point, CurveError> {
+        if !self.is_valid_point(point) {
+            return Err(CurveError::InvalidPoint);
+        }
+
+        if point.is_infinity() {
+            return Ok(point.clone());
+        }
+
+        let x = point.x.as_ref().unwrap();
+        let y = point.y.as_ref().unwrap();
+
+        Ok(Point::new(Some(x.clone()), Some((&self.p - y) % &self.p)))
     }
 
-    pub fn scalar_division(&self, scalar: BigUint, point: &Point) -> Option<Point> {
+    pub fn subtract_points(&self, point1: &Point, point2: &Point) -> Result<Point, CurveError> {
+        self.add_points(point1, &self.negate_point(point2)?)
+    }
+
+    pub fn scalar_division(&self, scalar: BigUint, point: &Point) -> Result<Point, CurveError> {
         if scalar == BigUint::ZERO {
-            return None;
+            return Err(CurveError::ScalarIsZero);
         }
 
         let inverse = self.calculate_inverse(&scalar);
-        Some(self.scalar_multiplication(&inverse, point))
+        Ok(self.scalar_multiplication(&inverse, point)?)
     }
 
-    pub fn scalar_multiplication(&self, scalar: &BigUint, point: &Point) -> Point {
+    pub fn scalar_multiplication(
+        &self,
+        scalar: &BigUint,
+        point: &Point,
+    ) -> Result<Point, CurveError> {
+        if !self.is_valid_point(point) {
+            return Err(CurveError::InvalidPoint);
+        }
+
         let mut result = Point::new(None, None);
         let mut current = point.clone();
         let mut k = scalar.clone();
 
         while k > BigUint::from(0u32) {
             if &k % 2u32 == BigUint::from(1u32) {
-                result = self.add_points(&result, &current);
+                result = self.add_points(&result, &current)?;
             }
-            current = self.add_points(&current, &current);
+            current = self.add_points(&current, &current)?;
             k >>= 1;
         }
 
-        result
+        Ok(result)
     }
 
-    pub fn add_points(&self, point1: &Point, point2: &Point) -> Point {
+    pub fn add_points(&self, point1: &Point, point2: &Point) -> Result<Point, CurveError> {
+        if !self.is_valid_point(point1) || !self.is_valid_point(point2) {
+            return Err(CurveError::InvalidPoint);
+        }
+
         // Adding points at infinity
         if point1.is_infinity() {
-            return point2.clone();
+            return Ok(point2.clone());
         }
 
         if point2.is_infinity() {
-            return point1.clone();
+            return Ok(point1.clone());
         }
 
         let (x1, y1) = (point1.x.as_ref().unwrap(), point1.y.as_ref().unwrap());
@@ -68,7 +104,7 @@ impl EllipticCurve {
 
         // Adding inverse
         if x1 == x2 && (y1 + y2) % &self.p == BigUint::from(0u32) {
-            return Point::new(None, None);
+            return Ok(Point::new(None, None));
         }
 
         let slope = self.calculate_slope(x1, y1, x2, y2);
@@ -76,19 +112,23 @@ impl EllipticCurve {
         let x3 = (slope.clone() * slope.clone() + &self.p - x1 + &self.p - x2) % &self.p;
         let y3 = (slope * (x1 + &self.p - &x3) + &self.p - y1) % &self.p;
 
-        Point::new(Some(x3), Some(y3))
+        Ok(Point::new(Some(x3), Some(y3)))
     }
 
-    pub fn order_of_point(&self, point: &Point) -> BigUint {
+    pub fn order_of_point(&self, point: &Point) -> Result<BigUint, CurveError> {
+        if !self.is_valid_point(point) {
+            return Err(CurveError::InvalidPoint);
+        }
+
         let mut k = BigUint::from(1u32);
         let mut current = point.clone();
 
         while !current.is_infinity() {
-            current = self.add_points(&current, point);
+            current = self.add_points(&current, point)?;
             k += 1u32;
         }
 
-        k
+        Ok(k)
     }
 
     fn calculate_slope(&self, x1: &BigUint, y1: &BigUint, x2: &BigUint, y2: &BigUint) -> BigUint {
@@ -106,7 +146,8 @@ impl EllipticCurve {
         (numerator * denominator) % &self.p
     }
 
-    fn calculate_inverse(&self, number_to_invert: &BigUint) -> BigUint {
+    pub fn calculate_inverse(&self, number_to_invert: &BigUint) -> BigUint {
+        // ! TODO -> MAYBE HERE SHOULD THROW ERROR IF NUMBER IS 0 !!! Check after in with add_points method
         number_to_invert.modpow(&(&self.p - BigUint::from(2u32)), &self.p)
     }
 }
