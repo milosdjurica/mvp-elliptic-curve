@@ -4,6 +4,7 @@ use point::Point;
 
 mod elliptic_curve;
 mod point;
+mod tests;
 
 fn main() {
     let a = BigUint::from(2u32);
