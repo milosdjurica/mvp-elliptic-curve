@@ -183,4 +183,122 @@ mod tests {
             Point::new(Some(to_biguint(17)), Some(to_biguint(87)))
         );
     }
+
+    #[test]
+    fn test_add_points_invalid_point1() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(Some(to_biguint(0)), Some(to_biguint(0)));
+        let point2 = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+
+        let result = curve.add_points(&point1, &point2);
+
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), CurveError::InvalidPoint);
+    }
+
+    #[test]
+    fn test_add_points_invalid_point2() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+        let point2 = Point::new(Some(to_biguint(0)), Some(to_biguint(0)));
+
+        let result = curve.add_points(&point1, &point2);
+
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), CurveError::InvalidPoint);
+    }
+
+    #[test]
+    fn test_add_points_point1_is_infinity() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(None, None);
+        let point2 = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+
+        let result = curve.add_points(&point1, &point2);
+
+        assert_eq!(result.unwrap(), point2);
+    }
+
+    #[test]
+    fn test_add_points_point2_is_infinity() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+        let point2 = Point::new(None, None);
+
+        let result = curve.add_points(&point1, &point2);
+
+        assert_eq!(result.unwrap(), point1);
+    }
+
+    #[test]
+    fn test_add_points_adds_1() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(Some(to_biguint(3)), Some(to_biguint(6)));
+        let point2 = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+
+        let expected_result = Point::new(Some(to_biguint(85)), Some(to_biguint(71)));
+        let result = curve.add_points(&point1, &point2);
+
+        assert_eq!(result.unwrap(), expected_result);
+    }
+
+    #[test]
+    fn test_add_points_adds_2() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+        let point2 = Point::new(Some(to_biguint(3)), Some(to_biguint(6)));
+
+        let expected_result = Point::new(Some(to_biguint(85)), Some(to_biguint(71)));
+        let result = curve.add_points(&point1, &point2);
+
+        assert_eq!(result.unwrap(), expected_result);
+    }
+
+    #[test]
+    fn test_add_points_adds_3() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(Some(to_biguint(0)), Some(to_biguint(87)));
+        let point2 = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+
+        let expected_result = Point::new(None, None);
+        let result = curve.add_points(&point1, &point2);
+
+        assert_eq!(result.unwrap(), expected_result);
+    }
+
+    #[test]
+    fn test_add_points_adds_4() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(Some(to_biguint(23)), Some(to_biguint(73)));
+        let point2 = Point::new(Some(to_biguint(23)), Some(to_biguint(24)));
+
+        let expected_result = Point::new(None, None);
+        let result = curve.add_points(&point1, &point2);
+
+        assert_eq!(result.unwrap(), expected_result);
+    }
+
+    #[test]
+    fn test_add_points_adds_5() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(Some(to_biguint(23)), Some(to_biguint(73)));
+        let point2 = Point::new(Some(to_biguint(23)), Some(to_biguint(73)));
+
+        let expected_result = Point::new(Some(to_biguint(95)), Some(to_biguint(31)));
+        let result = curve.add_points(&point1, &point2);
+
+        assert_eq!(result.unwrap(), expected_result);
+    }
+
+    #[test]
+    fn test_add_points_adds_6() {
+        let curve = create_curve(2, 3, 97);
+        let point1 = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+        let point2 = Point::new(Some(to_biguint(0)), Some(to_biguint(10)));
+
+        let expected_result = Point::new(Some(to_biguint(65)), Some(to_biguint(32)));
+        let result = curve.add_points(&point1, &point2);
+
+        assert_eq!(result.unwrap(), expected_result);
+    }
 }

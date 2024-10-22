@@ -86,7 +86,7 @@ impl EllipticCurve {
     }
 
     pub fn add_points(&self, point1: &Point, point2: &Point) -> Result<Point, CurveError> {
-        if !self.is_valid_point(point1) | !self.is_valid_point(point2) {
+        if !self.is_valid_point(point1) || !self.is_valid_point(point2) {
             return Err(CurveError::InvalidPoint);
         }
 
