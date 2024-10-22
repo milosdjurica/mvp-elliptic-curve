@@ -8,7 +8,7 @@ pub struct EllipticCurve {
     p: BigUint,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum CurveError {
     InvalidPoint,
 }
