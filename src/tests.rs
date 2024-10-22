@@ -20,7 +20,7 @@ mod tests {
         let curve = create_curve(2, 3, 97);
         let point = Point::new(Some(to_biguint(0)), Some(to_biguint(0)));
 
-        assert!(!curve.ensure_point_is_valid(&point))
+        assert!(!curve.is_valid_point(&point))
     }
 
     #[test]
